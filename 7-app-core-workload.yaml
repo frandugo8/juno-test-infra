@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core
+  namespace: app
+spec:
+  selector:
+    matchLabels:
+      app: core
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: core
+    spec:
+      containers:
+      - name: core
+        image: frandpradas/juno-core:v2
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8000 
+        env:
+        - name: MONGODB_URL
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: MONGODB_URL
+      imagePullSecrets:
+      - name: myregistrykey
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: core
+  namespace: app
+spec:
+  selector:
+    app: core
+  ports:
+    - name: http
+      port: 8000
+  type: ClusterIP
